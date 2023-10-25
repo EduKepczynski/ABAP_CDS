@@ -1,15 +1,16 @@
 @AbapCatalog.viewEnhancementCategory: [#NONE]
 @AccessControl.authorizationCheck: #NOT_REQUIRED
-@EndUserText.label: 'CDS View using LEFT OUTER JOIN'
+@EndUserText.label: 'CDS View using CROSS JOIN'
 @Metadata.ignorePropagatedAnnotations: true
 @ObjectModel.usageType:{
     serviceQuality: #X,
     sizeCategory: #S,
     dataClass: #MIXED
 }
-define view entity ZEKF_CDS_LEFT_OUTER_JOIN
-  as select from    /dmo/booking  as B
-    left outer join /dmo/customer as C on C.customer_id = B.customer_id
+define view entity ZEKF_CDS_CROSS_JOIN
+  as select from /dmo/booking  as B
+    cross join   /dmo/customer as C
+  // We don't need to specify a common field to join, such as 'on C.customer_id = B.customer_id'
 {
       // Left side table
   key C.customer_id                        as Customer_ID,
@@ -27,3 +28,8 @@ define view entity ZEKF_CDS_LEFT_OUTER_JOIN
       // We use the keyword COALESCE
       coalesce( B.flight_date, 'No Date' ) as Flight_Date
 }
+
+// CROSS JOIN fetched a lot of wrong data in this scenario.
+// It multiplies the number of rows of both tables.
+// Could be used, for example, when you want to join a sales order table with a tax table.
+// For every sale order on left table, it will show all the taxes (all the rows) of right table.
